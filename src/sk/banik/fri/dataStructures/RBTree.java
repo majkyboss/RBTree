@@ -92,27 +92,55 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 			RBNode uncle = uncle(node);
 			
 			if (!isRed(uncle)) {
-				if (node.equals(node.parent.leftChild)) {
-					// case 1.2
-					rightRotation(node.parent);
-					if (brother(node).equals(uncle)) {
-						// case 1.4
-						leftRotation(node);
-					}
-				} else {
-					// case 1.1
-					leftRotation(node.parent);
-					if (brother(node).equals(uncle)) {
-						// case 1.3
+				RBNode grandParent = node.parent.parent;
+				RBNode parent = node.parent;
+				
+				RBNode head = node.parent;
+				if (parent.equals(grandParent.rightChild)) {
+					// GP.r == P
+					
+					if (node.equals(node.parent.leftChild)) {
 						rightRotation(node);
+						head = node;
 					}
+					// do second rotation or if the n.p.r==n this will be first
+					leftRotation(head);
+				} else {
+					// GP.l == P
+					
+					if (node.equals(node.parent.rightChild)) {
+						leftRotation(node);
+						head = node;
+					}
+					rightRotation(head);
 				}
 				// re-coloring
-				if (node.parent != null) {
-					node.parent.color = BLACK;
-					if (node.parent.rightChild != null) node.parent.rightChild.color = RED;
-					if (node.parent.leftChild != null) node.parent.leftChild.color = RED;
-				}
+				head.color = BLACK;
+				if (head.leftChild != null) head.leftChild.color = RED;
+				if (head.rightChild != null) head.rightChild.color = RED;				
+				
+				
+//				if (node.equals(node.parent.leftChild)) {
+//					// case 1.2
+//					rightRotation(node.parent);
+//					if (brother(node).equals(uncle)) {
+//						// case 1.4
+//						leftRotation(node);
+//					}
+//				} else {
+//					// case 1.1
+//					leftRotation(node.parent);
+//					if (brother(node).equals(uncle)) {
+//						// case 1.3
+//						rightRotation(node);
+//					}
+//				}
+//				// re-coloring
+//				if (node.parent != null) {
+//					node.parent.color = BLACK;
+//					if (node.parent.rightChild != null) node.parent.rightChild.color = RED;
+//					if (node.parent.leftChild != null) node.parent.leftChild.color = RED;
+//				}
 			} else {
 				// case 2
 				RBNode grandParent = node.parent.parent;
@@ -145,23 +173,37 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		}
 		
 		RBNode grandParent = node.parent.parent;
+		RBNode parent = node.parent;
 		
-		// move node's left child to parent as child (on the place where the node was under node's parent)
-		if (node.leftChild != null) node.leftChild.parent = node.parent;
-		node.parent.rightChild = node.leftChild;
+		parent.rightChild = node.leftChild;
+		if (node.leftChild != null) node.leftChild.parent = parent;
 		
-		// move parent of node to left child of node
-		node.parent.parent = node;
-		node.leftChild = node.parent;
+		parent.parent = node;
+		node.leftChild = parent;
 		
-		// update refs from grand parent
 		node.parent = grandParent;
-		if (node.parent == null) root = node;
-		else if (node.leftChild.equals(grandParent.leftChild))
+		if (grandParent == null) root = node;
+		else if (grandParent.leftChild.equals(parent))
 			grandParent.leftChild = node;
-		else {
+		else
 			grandParent.rightChild = node;
-		}
+		
+//		// move node's left child to parent as child (on the place where the node was under node's parent)
+//		if (node.leftChild != null) node.leftChild.parent = node.parent;
+//		node.parent.rightChild = node.leftChild;
+//		
+//		// move parent of node to left child of node
+//		node.parent.parent = node;
+//		node.leftChild = node.parent;
+//		
+//		// update refs from grand parent
+//		node.parent = grandParent;
+//		if (node.parent == null) root = node;
+//		else if (node.leftChild.equals(grandParent.leftChild))
+//			grandParent.leftChild = node;
+//		else {
+//			grandParent.rightChild = node;
+//		}
 	}
 
 	private void rightRotation(RBNode node) {
@@ -170,25 +212,37 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		}
 		
 		RBNode grandParent = node.parent.parent;
+		RBNode parent = node.parent;
 		
+		parent.leftChild = node.rightChild;
+		if (node.rightChild != null) node.rightChild.parent = parent;
 		
+		parent.parent = node;
+		node.rightChild = parent;
 		
-		// move node's right child to parent as child (on the place where the node was under node's parent)
-		if (node.rightChild != null) node.rightChild.parent = node.parent;
-		node.parent.leftChild = node.rightChild;
-		
-		// move parent of node to right child of node
-		node.parent.parent = node;
-		node.rightChild = node.parent;
-		
-		// update refs from grand parent
 		node.parent = grandParent;
-		if (node.parent == null) root = node;
-		else if (node.rightChild.equals(grandParent.leftChild))
+		if (grandParent == null) root = node;
+		else if (grandParent.leftChild.equals(parent))
 			grandParent.leftChild = node;
-		else {
+		else
 			grandParent.rightChild = node;
-		}
+//		
+//		// move node's right child to parent as child (on the place where the node was under node's parent)
+//		if (node.rightChild != null) node.rightChild.parent = node.parent;
+//		node.parent.leftChild = node.rightChild;
+//		
+//		// move parent of node to right child of node
+//		node.parent.parent = node;
+//		node.rightChild = node.parent;
+//		
+//		// update refs from grand parent
+//		node.parent = grandParent;
+//		if (node.parent == null) root = node;
+//		else if (node.rightChild.equals(grandParent.leftChild))
+//			grandParent.leftChild = node;
+//		else {
+//			grandParent.rightChild = node;
+//		}
 	}
 
 	private RBNode uncle(RBNode node) {
@@ -310,7 +364,7 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 
 	private void printHelper(RBNode n, int indent) {
 		if (n == null) {
-			System.out.print("<empty tree>");
+			System.out.print("<empty tree>\n");
 			return;
 		}
 		if (n.rightChild != null) {
