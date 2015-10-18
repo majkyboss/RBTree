@@ -281,15 +281,33 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
     *  Check the RB tree
     **********************************************************************/
     public boolean check() {
-        if (!isBST())            System.out.println("Not in symmetric order");
-//	        if (!isSizeConsistent()) System.out.println("Subtree counts not consistent");
-//	        if (!isRankConsistent()) System.out.println("Ranks not consistent");
-        if (!is23())             System.out.println("Not a 2-3 tree");
-        if (!isBalanced())       System.out.println("Not balanced");
-        return isBST() &&/* isSizeConsistent() && isRankConsistent() &&*/ is23() && isBalanced();
+		if (!isBST())                    System.out.println("Not in symmetric order");
+////	        if (!isSizeConsistent()) System.out.println("Subtree counts not consistent");
+////	        if (!isRankConsistent()) System.out.println("Ranks not consistent");
+//        if (!is23())             System.out.println("Not a 2-3 tree");
+//        if (!isBalanced())       System.out.println("Not balanced");
+//        return isBST() &&/* isSizeConsistent() && isRankConsistent() &&*/ is23() && isBalanced();
+    	
+		// is root RED
+        if (isRed(root))                System.out.println("The root is not BLACK");
+		// every RED node has only BLACK nodes
+        if (!redsHaveOnlyBLACKs(root))   System.out.println("Two red nodes in a row");
+		// balanced - the count of BLACK nodes on the path to the list is same in whole tree
+    	if (!isBalanced())               System.out.println("Not balanced");
+    	
+    	return isBST() && !isRed(root) && redsHaveOnlyBLACKs(root) && isBalanced();
     }
 
-    // does this binary tree satisfy symmetric order?
+    private boolean redsHaveOnlyBLACKs(RBNode node) {
+		if (node == null)
+			return true;
+		if (node != root && isRed(node) && isRed(node.leftChild) ||
+				node != root && isRed(node) && isRed(node.rightChild))
+			return false;
+		return redsHaveOnlyBLACKs(node.leftChild) && redsHaveOnlyBLACKs(node.rightChild);
+	}
+
+	// does this binary tree satisfy symmetric order?
     // Note: this test also ensures that data structure is a binary tree since order is strict
     private boolean isBST() {
         return isBST(root, null, null);

@@ -34,4 +34,14 @@ public class TestRBTree {
         assertTrue(checkStatus);
 	}
 
+	@Test
+	public void bigTest() throws Exception {
+		// insert pair <key, value>
+		// check if tree contains inserted node
+		// check the consistency - if children is bigger and less and if parent is
+		// check if size is good
+		
+		// do this many times for random values
+		// and remember generated values
+	}
 }
