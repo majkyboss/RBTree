@@ -2,9 +2,14 @@ package sk.banik.fri.dataStructures.tests;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.HashMap;
+
 import org.junit.Test;
 
 import sk.banik.fri.dataStructures.RBTree;
+import sk.banik.fri.dataStructures.RBTree.RBNode;
 
 public class TestRBTree {
 
@@ -23,25 +28,54 @@ public class TestRBTree {
 				, "P"
 				, "L"
 				, "E"};
-        RBTree<String, Integer> st = new RBTree<String, Integer>();
+        RBTree<String, Integer> tree = new RBTree<String, Integer>();
         for (int i = 0; i < args.length; i++) {
             String key = args[i];
-            st.insert(key, i);
+            tree.insert(key, i);
         }
-        st.printBetter();
-        boolean checkStatus = st.check();
+        tree.printBetter();
+        boolean checkStatus = tree.check();
         System.out.println("is RB Tree? : " + checkStatus);
         assertTrue(checkStatus);
 	}
 
 	@Test
-	public void bigTest() throws Exception {
-		// insert pair <key, value>
-		// check if tree contains inserted node
-		// check the consistency - if children is bigger and less and if parent is
-		// check if size is good
+	public void testInsert() throws Exception {
+		RBTree<Integer, String> rbTree = new RBTree<Integer, String>();
+		HashMap<Integer, String> backupStructure = new HashMap<Integer, String>();
+		int maxTestedCount = 10*10;
 		
-		// do this many times for random values
-		// and remember generated values
+		do {
+			// insert pair <key, value>
+			Double dKey = Math.random();
+			while (backupStructure.containsKey(dKey.intValue())) {
+				dKey = Math.random();
+			}
+			String val = "" + dKey.intValue();
+			rbTree.insert(dKey.intValue(), val);
+			backupStructure.put(dKey.intValue(), val);
+			// check if tree contains inserted node
+			String foundValue = rbTree.find(dKey.intValue());
+			assertNotNull(foundValue);
+			assertTrue(foundValue.equals(val));
+			// check the consistency - if children is bigger and less and if parent is
+			Method findNodeMethod = rbTree.getClass().getDeclaredMethod(
+					"findNode", Comparable.class);
+			findNodeMethod.setAccessible(true);
+			Object returnedValue = findNodeMethod.invoke(rbTree,
+					dKey.intValue());
+			RBNode foundNode = (RBNode) returnedValue;
+			if (foundNode.leftChild != null)
+				assertTrue(foundNode.key.compareTo(foundNode.leftChild.key) > 0);
+			if (foundNode.rightChild != null)
+				assertTrue(foundNode.key.compareTo(foundNode.rightChild.key) < 0);
+			// check if size is good
+			assertEquals(rbTree.size(), backupStructure.size());
+			// general check
+			assertTrue(rbTree.check());
+			
+			// do this many times for random values
+			// and remember generated values
+		} while (backupStructure.size() < maxTestedCount);
 	}
 }
