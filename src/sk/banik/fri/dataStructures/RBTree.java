@@ -119,28 +119,6 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 				if (head.leftChild != null) head.leftChild.color = RED;
 				if (head.rightChild != null) head.rightChild.color = RED;				
 				
-				
-//				if (node.equals(node.parent.leftChild)) {
-//					// case 1.2
-//					rightRotation(node.parent);
-//					if (brother(node).equals(uncle)) {
-//						// case 1.4
-//						leftRotation(node);
-//					}
-//				} else {
-//					// case 1.1
-//					leftRotation(node.parent);
-//					if (brother(node).equals(uncle)) {
-//						// case 1.3
-//						rightRotation(node);
-//					}
-//				}
-//				// re-coloring
-//				if (node.parent != null) {
-//					node.parent.color = BLACK;
-//					if (node.parent.rightChild != null) node.parent.rightChild.color = RED;
-//					if (node.parent.leftChild != null) node.parent.leftChild.color = RED;
-//				}
 			} else {
 				// case 2
 				RBNode grandParent = node.parent.parent;
@@ -188,22 +166,6 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		else
 			grandParent.rightChild = node;
 		
-//		// move node's left child to parent as child (on the place where the node was under node's parent)
-//		if (node.leftChild != null) node.leftChild.parent = node.parent;
-//		node.parent.rightChild = node.leftChild;
-//		
-//		// move parent of node to left child of node
-//		node.parent.parent = node;
-//		node.leftChild = node.parent;
-//		
-//		// update refs from grand parent
-//		node.parent = grandParent;
-//		if (node.parent == null) root = node;
-//		else if (node.leftChild.equals(grandParent.leftChild))
-//			grandParent.leftChild = node;
-//		else {
-//			grandParent.rightChild = node;
-//		}
 	}
 
 	private void rightRotation(RBNode node) {
@@ -226,23 +188,6 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 			grandParent.leftChild = node;
 		else
 			grandParent.rightChild = node;
-//		
-//		// move node's right child to parent as child (on the place where the node was under node's parent)
-//		if (node.rightChild != null) node.rightChild.parent = node.parent;
-//		node.parent.leftChild = node.rightChild;
-//		
-//		// move parent of node to right child of node
-//		node.parent.parent = node;
-//		node.rightChild = node.parent;
-//		
-//		// update refs from grand parent
-//		node.parent = grandParent;
-//		if (node.parent == null) root = node;
-//		else if (node.rightChild.equals(grandParent.leftChild))
-//			grandParent.leftChild = node;
-//		else {
-//			grandParent.rightChild = node;
-//		}
 	}
 
 	private RBNode uncle(RBNode node) {
@@ -275,6 +220,17 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 	public Value find(Key key) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	private RBNode findNode(Key key) {
+		// TODO Auto-generated method stub
+		return new RBNode(null, null, BLACK, null);
+	}
+	
+	@Override
+	public int size() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 	
 	/*********************************************************************
