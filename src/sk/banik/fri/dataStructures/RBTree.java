@@ -33,6 +33,12 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 			if (cmp > 0) return node;
 			else return this;
 		}
+		
+		@Override
+		public String toString() {
+			// TODO Auto-generated method stub
+			return "RBNode: key="+key+", value="+value;
+		}
 	}
 
 	@Override
@@ -161,7 +167,7 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		
 		node.parent = grandParent;
 		if (grandParent == null) root = node;
-		else if (grandParent.leftChild.equals(parent))
+		else if (grandParent.leftChild != null && grandParent.leftChild.equals(parent))
 			grandParent.leftChild = node;
 		else
 			grandParent.rightChild = node;
@@ -184,7 +190,14 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		
 		node.parent = grandParent;
 		if (grandParent == null) root = node;
-		else if (grandParent.leftChild.equals(parent))
+		//
+//		if (grandParent == null)
+//			System.out.println("null");
+//		if (grandParent.leftChild == null)
+//			System.out.println("null");
+//		
+		//
+		else if (grandParent.leftChild != null && grandParent.leftChild.equals(parent))
 			grandParent.leftChild = node;
 		else
 			grandParent.rightChild = node;
@@ -213,24 +226,93 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 	@Override
 	public Value delete(Key key) {
 		// TODO Auto-generated method stub
+		
+		// find the node
+		RBNode toDel = findNode(key);
+		if (toDel == null) {
+			// tree not contains key
+			return null;
+		}
+		
+		// BST delete ----------------------------
+		// replace with min of right sub-tree
+		if (root.key.compareTo(key) == 0) {
+			RBNode t = root;
+			root = null;
+			return t.value;
+		}
+		
+		// get min of right 
+		RBNode minRight = min(toDel.rightChild);
+		// disconnect min from parent reconnect child of min to parent
+		minRight.parent.leftChild = minRight.rightChild;
+		minRight.rightChild.parent = minRight.parent;
+		
+		// replace toDel with min of right
+		minRight.rightChild = toDel.rightChild;
+		minRight.leftChild = toDel.leftChild;
+		minRight.parent = toDel.parent;
+		if (toDel.parent.leftChild.equals(toDel)) toDel.parent.leftChild = minRight;
+		else toDel.parent.rightChild = minRight;
+		// ---------------------------------------
+		
+		
+		
+		
 		return null;
+	}
+	
+	private RBNode min(RBNode node) {
+		if (node == null) {
+			throw new NullPointerException();
+		}
+		
+		RBNode min = node;
+		while (min.leftChild != null){
+			min = min.leftChild;
+		}
+
+		return min;
 	}
 
 	@Override
 	public Value find(Key key) {
-		// TODO Auto-generated method stub
-		return null;
+		RBNode node = this.findNode(key);
+		if (node != null) return node.value;
+		else return null;
 	}
 	
 	private RBNode findNode(Key key) {
-		// TODO Auto-generated method stub
-		return new RBNode(null, null, BLACK, null);
+		if (key == null) {
+			throw new NullPointerException();
+		}
+		
+		RBNode node = root;
+		while (!node.key.equals(key) && node != null){
+			int cmp = node.key.compareTo(key) * (-1);
+			// make cmp opposite because node is compared with key,
+			// not key compared with node
+			if (cmp < 0) {
+				node = node.leftChild;
+			} else if (cmp > 0) {
+				node = node.rightChild;
+			}
+		}
+		
+		return node;
 	}
 	
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+		return size(root);
+	}
+	
+	private int size(RBNode node){
+		int i = 1;
+		if (node.leftChild != null ) i += size(node.leftChild);
+		if (node.rightChild != null ) i += size(node.rightChild);
+		
+		return i;
 	}
 	
 	/*********************************************************************
@@ -347,9 +429,9 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		for (int i = 0; i < indent; i++)
 			System.out.print(" ");
 		if (n.color == BLACK)
-			System.out.println(n.key);
+			System.out.println(n.key + ":" + n.value);
 		else
-			System.out.println("<" + n.key + ">");
+			System.out.println("<" + n.key + ":" + n.value + ">");
 		if (n.leftChild != null) {
 			printHelper(n.leftChild, indent + INDENT_STEP);
 		}

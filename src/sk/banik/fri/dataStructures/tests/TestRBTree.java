@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.junit.Test;
 
@@ -47,7 +48,8 @@ public class TestRBTree {
 		
 		do {
 			// insert pair <key, value>
-			Double dKey = Math.random();
+			
+			Double dKey = (Math.random() * maxTestedCount * maxTestedCount);
 			while (backupStructure.containsKey(dKey.intValue())) {
 				dKey = Math.random();
 			}
@@ -77,5 +79,43 @@ public class TestRBTree {
 			// do this many times for random values
 			// and remember generated values
 		} while (backupStructure.size() < maxTestedCount);
+	}
+	
+	@Test
+	public void testBstDelete() throws Exception {
+		RBTree<Integer, String> rbTree = new RBTree<Integer, String>();
+		HashMap<Integer, String> backupStructure = new HashMap<Integer, String>();
+		int maxTestedCount = 5;
+		
+		do {
+			// insert pair <key, value>
+			Double dKey = (Math.random() * maxTestedCount * maxTestedCount);
+			while (backupStructure.containsKey(dKey.intValue())) {
+				dKey = Math.random();
+			}
+			String val = "" + dKey.intValue();
+			rbTree.insert(dKey.intValue(), val);
+			backupStructure.put(dKey.intValue(), val);
+		} while (backupStructure.size() < maxTestedCount);
+
+		Object[] array = backupStructure.keySet().toArray();
+		for (int i = 0; i < array.length; i++) {
+			int key = (int) array[i];
+			// try to remove node with key
+			String deletedValue= rbTree.delete(key);
+			String expectedValue = backupStructure.remove(key);
+			assertEquals(expectedValue, deletedValue);
+			
+			// check if tree contains inserted node
+			String foundValue = rbTree.find(key);
+			assertNull(foundValue);
+			
+			// check if size is good
+			assertEquals(rbTree.size(), backupStructure.size());
+			// general check
+			assertTrue(rbTree.check());
+			
+			// do this that much how much values are in backup structure
+		}
 	}
 }
