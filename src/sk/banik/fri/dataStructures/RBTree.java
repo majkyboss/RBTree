@@ -225,8 +225,6 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 	
 	@Override
 	public Value delete(Key key) {
-		// TODO Auto-generated method stub
-		
 		// find the node
 		RBNode toDel = findNode(key);
 		if (toDel == null) {
@@ -327,7 +325,11 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		}
 		// ---------------------------------------
 		
+		if (isRed(toDel))
+			return toDel.value;
 		
+		// RB delete fix
+		// TODO implements RB delete
 		
 		
 		return toDel.value;
