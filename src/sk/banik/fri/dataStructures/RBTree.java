@@ -235,31 +235,102 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		}
 		
 		// BST delete ----------------------------
-		// replace with min of right sub-tree
-		if (root.key.compareTo(key) == 0) {
-			RBNode t = root;
-			root = null;
-			return t.value;
+		{
+			if (toDel.rightChild == null && toDel.leftChild == null) {
+				// toDel is leaf - basic delete - cut the leaf
+				if (toDel.equals(root)) {
+					root = null;
+				} else {
+					// disconnect node from parent
+					if (toDel.parent.leftChild != null && toDel.parent.leftChild.equals(toDel)) {
+						toDel.parent.leftChild = null;
+					} else {
+						toDel.parent.rightChild = null;
+					}
+				}
+			} else if (toDel.rightChild == null) {
+				// replace by left subtree
+				if (toDel.equals(root)) {
+					root = toDel.leftChild;
+					toDel.leftChild.parent = null;
+				} else {
+					if (toDel.parent.leftChild != null && toDel.parent.leftChild.equals(toDel))
+						toDel.parent.leftChild = toDel.leftChild;
+					else {
+						toDel.parent.rightChild = toDel.leftChild;
+					}
+					toDel.leftChild.parent = toDel.parent;
+				}
+
+			} else if (toDel.leftChild == null) {
+				// replace by right subtree
+				if (toDel.equals(root)) {
+					root = toDel.rightChild;
+					toDel.rightChild.parent = null;
+				} else {
+					toDel.rightChild.parent = toDel.parent;
+					if (toDel.parent.leftChild != null && toDel.parent.leftChild.equals(toDel))
+						toDel.parent.leftChild = toDel.rightChild;
+					else {
+						toDel.parent.rightChild = toDel.rightChild;
+					}
+					toDel.rightChild.parent = toDel.parent;
+				}
+			} else {
+				// left and righ != null
+				// replace with min of right subtree
+
+				// get min of right
+				RBNode minRight = min(toDel.rightChild);
+				
+				if (minRight.equals(toDel.rightChild)) {
+					// do not disconnect if minRight is first right child
+					// only to replace it
+					// assert that there is no left child of minRight because it should be minimum
+					
+					// if else is same like in next else, also check other occurrences
+					if (toDel.equals(root)) {
+						root = minRight;
+					} else {
+						if (toDel.parent.leftChild != null && toDel.parent.leftChild.equals(toDel))
+							toDel.parent.leftChild = minRight;
+						else
+							toDel.parent.rightChild = minRight;
+					}
+					
+					minRight.parent = toDel.parent;
+					minRight.leftChild = toDel.leftChild;
+					toDel.leftChild.parent = minRight;
+					// right child will be same
+				} else {
+					// disconnect min from parent reconnect child of min to parent
+					minRight.parent.leftChild = minRight.rightChild;
+					if (minRight.rightChild != null)
+						minRight.rightChild.parent = minRight.parent;
+						
+					// replace toDel with min of right
+					minRight.rightChild = toDel.rightChild;
+					toDel.rightChild.parent = minRight;
+					minRight.leftChild = toDel.leftChild;
+					toDel.leftChild.parent = minRight;
+					minRight.parent = toDel.parent;
+					if (toDel.equals(root)) {
+						root = minRight;
+					} else {
+						if (toDel.parent.leftChild != null && toDel.parent.leftChild.equals(toDel))
+							toDel.parent.leftChild = minRight;
+						else
+							toDel.parent.rightChild = minRight;
+					}
+				}
+			}
 		}
-		
-		// get min of right 
-		RBNode minRight = min(toDel.rightChild);
-		// disconnect min from parent reconnect child of min to parent
-		minRight.parent.leftChild = minRight.rightChild;
-		minRight.rightChild.parent = minRight.parent;
-		
-		// replace toDel with min of right
-		minRight.rightChild = toDel.rightChild;
-		minRight.leftChild = toDel.leftChild;
-		minRight.parent = toDel.parent;
-		if (toDel.parent.leftChild.equals(toDel)) toDel.parent.leftChild = minRight;
-		else toDel.parent.rightChild = minRight;
 		// ---------------------------------------
 		
 		
 		
 		
-		return null;
+		return toDel.value;
 	}
 	
 	private RBNode min(RBNode node) {
@@ -288,7 +359,7 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		}
 		
 		RBNode node = root;
-		while (!node.key.equals(key) && node != null){
+		while (node != null && !node.key.equals(key)){
 			int cmp = node.key.compareTo(key) * (-1);
 			// make cmp opposite because node is compared with key,
 			// not key compared with node
@@ -308,9 +379,13 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 	}
 	
 	private int size(RBNode node){
+		if (node == null) {
+			return 0;
+		}
+		
 		int i = 1;
-		if (node.leftChild != null ) i += size(node.leftChild);
-		if (node.rightChild != null ) i += size(node.rightChild);
+		i += size(node.leftChild);
+		i += size(node.rightChild);
 		
 		return i;
 	}
