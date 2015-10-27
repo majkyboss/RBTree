@@ -36,8 +36,31 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		
 		@Override
 		public String toString() {
-			// TODO Auto-generated method stub
 			return "RBNode: key="+key+", value="+value;
+		}
+
+		public RBNode brother() {
+			if (parent == null) {
+				return null;
+			}
+			
+			if (this.equals(parent.leftChild)) {
+				return parent.rightChild;
+			} else {
+				return parent.leftChild;
+			}
+		}
+		
+		public RBNode grandparent() {
+		    assert parent != null;
+		    assert parent.parent != null;
+		    return parent.parent;
+		}
+		
+		public RBNode uncle() {
+		    assert parent != null;
+		    assert parent.parent != null;
+		    return parent.brother();
 		}
 	}
 
@@ -139,18 +162,6 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		}
 	}
 
-	private Object brother(RBNode node) {
-		if (node == null || node.parent == null) {
-			return null;
-		}
-		
-		if (node.parent.leftChild.equals(node)) {
-			return node.parent.rightChild;
-		} else {
-			return node.parent.leftChild;
-		}
-	}
-
 	private void leftRotation(RBNode node) {
 		if (node.parent == null) {
 			return;
@@ -190,13 +201,6 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		
 		node.parent = grandParent;
 		if (grandParent == null) root = node;
-		//
-//		if (grandParent == null)
-//			System.out.println("null");
-//		if (grandParent.leftChild == null)
-//			System.out.println("null");
-//		
-		//
 		else if (grandParent.leftChild != null && grandParent.leftChild.equals(parent))
 			grandParent.leftChild = node;
 		else
@@ -225,6 +229,14 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 	
 	@Override
 	public Value delete(Key key) {
+		RBNode deleted = deleteNode(key);
+		if (deleted != null) {
+			return deleted.value;
+		}
+		return null;
+	}
+	
+	public RBNode deleteNode(Key key) {
 		// find the node
 		RBNode toDel = findNode(key);
 		if (toDel == null) {
@@ -232,13 +244,31 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 			return null;
 		}
 		
+		// actually toDel replaced by this and toDel deleted (toDel not connected to tree)
+		RBNode deleted = null;
+		RBNode brother = null;
+		int LEFT_CHILD = 1;
+		int RIGHT_CHILD = 2;
+		int NO_PARENT = -1;
+		int deletedChildhood = NO_PARENT;
+		
 		// BST delete ----------------------------
 		{
 			if (toDel.rightChild == null && toDel.leftChild == null) {
 				// toDel is leaf - basic delete - cut the leaf
+				deleted = toDel;
+				
 				if (toDel.equals(root)) {
 					root = null;
 				} else {
+					if (deleted.equals(deleted.parent.leftChild)){
+						brother = deleted.parent.rightChild;
+						deletedChildhood = LEFT_CHILD;
+					} else {
+						brother = deleted.parent.leftChild;
+						deletedChildhood = RIGHT_CHILD;
+					}
+					
 					// disconnect node from parent
 					if (toDel.parent.leftChild != null && toDel.parent.leftChild.equals(toDel)) {
 						toDel.parent.leftChild = null;
@@ -248,6 +278,15 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 				}
 			} else if (toDel.rightChild == null) {
 				// replace by left subtree
+				deleted = toDel.leftChild;
+				if (deleted.equals(deleted.parent.leftChild)){
+					brother = deleted.parent.rightChild;
+					deletedChildhood = LEFT_CHILD;
+				} else {
+					brother = deleted.parent.leftChild;
+					deletedChildhood = RIGHT_CHILD;
+				}
+				
 				if (toDel.equals(root)) {
 					root = toDel.leftChild;
 					toDel.leftChild.parent = null;
@@ -262,6 +301,10 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 
 			} else if (toDel.leftChild == null) {
 				// replace by right subtree
+				deleted = toDel.rightChild;
+				if (deleted.equals(deleted.parent.leftChild)) brother = deleted.parent.rightChild;
+				else brother = deleted.parent.leftChild;
+				
 				if (toDel.equals(root)) {
 					root = toDel.rightChild;
 					toDel.rightChild.parent = null;
@@ -280,13 +323,16 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 
 				// get min of right
 				RBNode minRight = min(toDel.rightChild);
+				deleted = minRight;
+				if (deleted.equals(deleted.parent.leftChild)) brother = deleted.parent.rightChild;
+				else brother = deleted.parent.leftChild;
 				
 				if (minRight.equals(toDel.rightChild)) {
 					// do not disconnect if minRight is first right child
 					// only to replace it
 					// assert that there is no left child of minRight because it should be minimum
 					
-					// if else is same like in next else, also check other occurrences
+					// TODO if else is same like in next else, also check other occurrences
 					if (toDel.equals(root)) {
 						root = minRight;
 					} else {
@@ -325,14 +371,16 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		}
 		// ---------------------------------------
 		
-		if (isRed(toDel))
-			return toDel.value;
+		if (isRed(deleted))
+			return toDel;
 		
 		// RB delete fix
 		// TODO implements RB delete
+//		RBNode n = deleted;
 		
 		
-		return toDel.value;
+		
+		return toDel;
 	}
 	
 	private RBNode min(RBNode node) {
@@ -346,6 +394,19 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		}
 
 		return min;
+	}
+	
+	private RBNode max(RBNode node) {
+		if (node == null) {
+			throw new NullPointerException();
+		}
+		
+		RBNode max = node;
+		while (max.rightChild != null){
+			max = max.rightChild;
+		}
+
+		return max;
 	}
 
 	@Override
@@ -395,14 +456,9 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 	/*********************************************************************
     *  Check the RB tree
     **********************************************************************/
+	
     public boolean check() {
 		if (!isBST())                    System.out.println("Not in symmetric order");
-////	        if (!isSizeConsistent()) System.out.println("Subtree counts not consistent");
-////	        if (!isRankConsistent()) System.out.println("Ranks not consistent");
-//        if (!is23())             System.out.println("Not a 2-3 tree");
-//        if (!isBalanced())       System.out.println("Not balanced");
-//        return isBST() &&/* isSizeConsistent() && isRankConsistent() &&*/ is23() && isBalanced();
-    	
 		// is root RED
         if (isRed(root))                System.out.println("The root is not BLACK");
 		// every RED node has only BLACK nodes
@@ -422,29 +478,16 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		return redsHaveOnlyBLACKs(node.leftChild) && redsHaveOnlyBLACKs(node.rightChild);
 	}
 
-	// does this binary tree satisfy symmetric order?
-    // Note: this test also ensures that data structure is a binary tree since order is strict
     private boolean isBST() {
         return isBST(root, null, null);
     }
 
-    // is the tree rooted at x a BST with all keys strictly between min and max
-    // (if min or max is null, treat as empty constraint)
-    // Credit: Bob Dondero's elegant solution
     private boolean isBST(RBNode x, Key min, Key max) {
         if (x == null) return true;
         if (min != null && x.key.compareTo(min) <= 0) return false;
         if (max != null && x.key.compareTo(max) >= 0) return false;
         return isBST(x.leftChild, min, x.key) && isBST(x.rightChild, x.key, max);
-    } 
-
-    // are the size fields correct?
-//	    private boolean isSizeConsistent() { return isSizeConsistent(root); }
-//	    private boolean isSizeConsistent(RBNode x) {
-//	        if (x == null) return true;
-//	        if (x.N != size(x.leftChild) + size(x.rightChild) + 1) return false;
-//	        return isSizeConsistent(x.leftChild) && isSizeConsistent(x.rightChild);
-//	    } 
+    }
 
     // check that ranks are consistent
 //	    private boolean isRankConsistent() {
@@ -455,18 +498,6 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 //	        return true;
 //	    }
 
-    // Does the tree have no red right links, and at most one (left)
-    // red links in a row on any path?
-    private boolean is23() { return is23(root); }
-    private boolean is23(RBNode x) {
-        if (x == null) return true;
-//        if (isRed(x.rightChild)) return false;
-        if (x != root && isRed(x) && isRed(x.leftChild))
-            return false;
-        return is23(x.leftChild) && is23(x.rightChild);
-    } 
-
-    // do all paths from root to leaf have same number of black edges?
     private boolean isBalanced() { 
         int black = 0;     // number of black links on path from root to min
         RBNode x = root;
@@ -476,8 +507,7 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
         }
         return isBalanced(root, black);
     }
-
-    // does every path from the root to a leaf have the given number of black links?
+    
     private boolean isBalanced(RBNode x, int black) {
         if (x == null) return black == 0;
         if (!isRed(x)) black--;
@@ -506,9 +536,9 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		for (int i = 0; i < indent; i++)
 			System.out.print(" ");
 		if (n.color == BLACK)
-			System.out.println(n.key + ":" + n.value);
+			System.out.println(n.key);
 		else
-			System.out.println("<" + n.key + ":" + n.value + ">");
+			System.out.println("<" + n.key + ">");
 		if (n.leftChild != null) {
 			printHelper(n.leftChild, indent + INDENT_STEP);
 		}
