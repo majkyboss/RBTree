@@ -5,4 +5,5 @@ public interface BasicMapCollection<Key extends Comparable<Key>, Value>{
 	Value delete(Key key);
 	Value find(Key key);
 	int size();
+	boolean check();
 };

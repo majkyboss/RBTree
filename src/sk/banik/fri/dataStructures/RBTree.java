@@ -7,7 +7,7 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 	
 	private RBNode root = null;
 
-	public class RBNode{
+	public class RBNode extends AbstractNode{
 		public Key key;
 		public Value value;
 		public boolean color;
@@ -19,7 +19,6 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 			this.key = key;
 			this.value = value;
 			this.color = color;
-			
 		}
 		
 		/**
