@@ -1,6 +1,7 @@
 package sk.banik.fri.dataStructures;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 
@@ -330,8 +331,18 @@ public class RBTreeOld<Key extends Comparable<Key>, Value> implements BasicMapCo
         else              return rank(hi) - rank(lo);
     }
 
+    @Override
+    public List<Value> getSortedList() {
 
-   /***************************************************************************
+        return null;
+    }
+
+    @Override
+    public Iterable<Value> getValues() {
+        return null;
+    }
+
+    /***************************************************************************
     *  Check the RB tree
     ***************************************************************************/
     public boolean check() {

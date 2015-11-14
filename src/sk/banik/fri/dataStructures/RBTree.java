@@ -1,6 +1,8 @@
 package sk.banik.fri.dataStructures;
 
 
+import java.util.List;
+
 public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapCollection<Key, Value>{
 	private static final boolean RED = true;
 	private static final boolean BLACK = false;
@@ -451,7 +453,17 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
 		
 		return i;
 	}
-	
+
+	@Override
+	public List<Value> getSortedList() {
+		return null;
+	}
+
+	@Override
+	public Iterable<Value> getValues() {
+		return null;
+	}
+
 	/*********************************************************************
     *  Check the RB tree
     **********************************************************************/
@@ -468,7 +480,7 @@ public class RBTree<Key extends Comparable<Key>, Value>  implements BasicMapColl
     	return isBST() && !isRed(root) && redsHaveOnlyBLACKs(root) && isBalanced();
     }
 
-    private boolean redsHaveOnlyBLACKs(RBNode node) {
+	private boolean redsHaveOnlyBLACKs(RBNode node) {
 		if (node == null)
 			return true;
 		if (node != root && isRed(node) && isRed(node.leftChild) ||
